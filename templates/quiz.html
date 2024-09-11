@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/quiz.css') }}">
+    <title>Maratona Tech</title>
+</head>
+<body>
+<main>
+    <div class="quiz-container">
+        <h2>Quiz</h2>
+        <div id="question-container">
+            <!-- Perguntas serão injetadas aqui pelo JavaScript -->
+        </div>
+        <div id="feedback" class="feedback"></div>
+        <button id="next-button" onclick="nextQuestion()">Resposta</button>
+        <div id="restart-timer" style="display: none;">
+            <p>Reiniciando em <span id="timer">5</span> segundos...</p>
+        </div>
+    </div>
+
+    <div class="results-container">
+        <h3>Últimos Resultados</h3>
+        <ul id="results-list">
+            <!-- Resultados serão injetados aqui pelo JavaScript -->
+        </ul>
+    </div>
+</main>
+<script>
+    const questions = [
+        {
+            question: 'A professora está dando matéria da prova e o seu amigo está te chamando. O que você faria?',
+            answers: { a: 'Iria conversar com meu amigo', b: 'Irei prestar atenção na aula', c: 'Irei mandar meu amigo calar a boca' },
+            correct: 'b',
+            explanations: {
+                a: 'Isso não é recomendado de se fazer porque pode te atrapalhar, e atrapalhar seu amigo, a entender a matéria.',
+                b: 'Parabéns!! Essa é opção mais adequada de ser realizada!',
+                c: 'Não é bom mandar as pessoas "calar a boca", invés disso diga fique quieto por um instante, vamos prestar atenção etc.'
+            }
+        },
+        {
+            question: 'Você está em trânsito e a pessoa na sua frente está parada. O que você faria?',
+            answers: { a: 'Gritaria com a pessoa', b: 'Xingaria a pessoa', c: 'Esperaria pacientemente' },
+            correct: 'c',
+            explanations: {
+                a: 'Gritar com a pessoa pode não ser a melhor solução, pois pode escalar a situação e gerar mais estresse.',
+                b: 'Se alguém começar a xingar a pessoa que está parada, a situação pode se tornar ainda mais tensa e desconfortável.',
+                c: 'A paciência pode ajudar a evitar conflitos e a criar um ambiente mais harmonioso para todos os envolvidos.'
+            }
+        },
+        {
+            question: 'Você está dando uma festa com o som altíssimo e mora ao lado de uma mulher viúva com uma criação que quase não consegue dormir. O que você faria?',
+            answers: { a: 'Abaixaria o som', b: 'Aumentaria o som', c: 'Iria na casa dela e falaria que não iria baixar o som' },
+            correct: 'a',
+            explanations: {
+                a: 'Parabéns!! Essa é a opção mais adequada de ser realizada!',
+                b: 'Não. Isso pode prejudicar ainda mais as crianças.',
+                c: 'Se você fizesse isso ela teria direito de chamar a polícia, registrar uma queixa, buscar apoio judicial entre outras coisas.'
+            }
+        },
+        {
+            question: 'Você é uma estudante e está querendo estudar mas o barulho do bar está te atrapalhando. O que você faria?',
+            answers: { a: 'Iria nesse bar e reclamaria com educação', b: 'Iria nesse bar e reclamaria xingando todo mundo', c: 'Tentaria colocar um fone' },
+            correct: 'a',
+            explanations: {
+                a: 'Você pode fazer isso!',
+                b: 'Não, se você fizer isso eles podem chamar a polícia para resolver a questão do barulho.',
+                c: 'Essa é uma boa reação!!'
+            }
+        },
+        {
+            question: 'Você está doente e só quer dormir e passam carros de polícia e te acordam. O que você faria?',
+            answers: { a: 'Sairia para rua gritando com o carro de polícia', b: 'Tentaria dormir novamente', c: 'Iria furar o pneu desse carro' },
+            correct: 'b',
+            explanations: {
+                a: 'Gritar com os carros de polícia não seria a melhor abordagem. Isso não resolveria o problema e poderia gerar um conflito desnecessário.',
+                b: 'Se o barulho dos carros de polícia continuar, e a tentativa de dormir for prejudicada, o ideal seria relatar o problema às autoridades em outro momento, mas sem confrontos diretos.',
+                c: 'Furar os pneus de um carro é uma ação ilegal e pode levar a consequências sérias, como prisão, multa e processos judiciais.'
+            }
+        },
+        {
+            question: 'Você quer brincar com o seu cachorro só que não consegue por causa dos fogos. O que você faria?',
+            answers: { a: 'Reclamaria educadamente com a pessoa que soltou fogos de artifício', b: 'Gritaria com a pessoa que soltou fogos de artifício', c: 'Xingaria e ligaria para a polícia' },
+            correct: 'a',
+            explanations: {
+                a: 'Reclamar educadamente é uma opção, mas talvez não resolva a situação se for uma comemoração pública.',
+                b: 'Gritar com quem soltou fogos de artifício não seria uma solução eficaz e poderia criar mais problemas.',
+                c: 'Xingar a pessoa que soltou fogos de artifício pode levar a problemas legais para você, além de gerar conflitos desnecessários.'
+            }
+        },
+        {
+            question: 'Você quer dormir mas não consegue porque sua cidade está em obras 00:00 noite. O que você faria?',
+            answers: { a: 'Gritaria com os pedreiros', b: 'Xingaria o prefeito', c: 'Usaria um aplicativo com sons calmantes' },
+            correct: 'c',
+            explanations: {
+                a: 'Gritar com os pedreiros provavelmente não resolveria o problema e só geraria conflito.',
+                b: 'Xingar o prefeito pode trazer mais problemas do que soluções, além de possíveis repercussões legais.',
+                c: 'Usar um aplicativo com sons calmantes é uma solução prática e eficaz para lidar com barulhos perturbadores, como as obras noturnas.'
+            }
+        },
+        {
+            question: 'Uma idosa está entrando no ônibus, e chega no ônibus, o motorista coloca uma música altíssima. O que você faria?',
+            answers: { a: 'Pediria educadamente para ele abaixar', b: 'Xingaria a empresa de ônibus', c: 'Colocaria uma música mais alta' },
+            correct: 'a',
+            explanations: {
+                a: 'Pedir educadamente para o motorista abaixar o volume da música é a abordagem mais eficaz e respeitosa.',
+                b: 'Xingar a empresa de ônibus pode não só ser improdutivo como também resultar em consequências legais e prejudicar sua própria reputação.',
+                c: 'Colocar música mais alta em resposta ao barulho do motorista apenas agravaria a situação e criaria mais problemas.'
+            }
+        },
+        {
+            question: 'Você estava no recreio e você estava correndo, a diretora vem dar um recado que não pode mais correr, seu amigo começa a gritar e chama você junto. O que você faria?',
+            answers: { a: 'Gritaria mais alto que ele', b: 'Xingaria a diretora', c: 'Pediria para ele parar' },
+            correct: 'c',
+            explanations: {
+                a: 'Gritar mais alto do que seu amigo não resolverá a situação e pode causar mais problemas.',
+                b: 'Xingar a diretora é uma reação inadequada que pode resultar em consequências graves e prejudicar sua posição na escola.',
+                c: 'Pedir para seu amigo parar de gritar é uma maneira prática de lidar com a situação de forma construtiva.'
+            }
+        },
+        {
+            question: 'Você está passando, e uma Maranata de motos passa empinando as motos. O que você faria?',
+            answers: { a: 'Falaria com as autoridades educadamente', b: 'Gritaria com as autoridades por não estarem cuidando disso', c: 'Sairia dali' },
+            correct: 'a',
+            explanations: {
+                a: 'Falar com as autoridades educadamente é a maneira certa de lidar com o problema de motos empinando.',
+                b: 'Gritar com as autoridades não é uma abordagem produtiva e pode complicar a situação.',
+                c: 'Sair da situação pode ser uma forma de evitar conflitos e preservar sua segurança, mas não resolve o problema subjacente das motos empinando.'
+            }
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let timer;
+    let restartTimer;
+
+    function showQuestion(index) {
+        const questionContainer = document.getElementById('question-container');
+        const feedbackContainer = document.getElementById('feedback');
+        const nextButton = document.getElementById('next-button');
+        const question = questions[index];
+
+        questionContainer.innerHTML = `
+                <div class="question-box">
+                    <p>${question.question}</p>
+                    <ul>
+                        ${Object.keys(question.answers).map(key => `
+                            <li>
+                                <input type="radio" name="answer" id="${key}" value="${key}">
+                                <label for="${key}">${question.answers[key]}</label>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `;
+
+        feedbackContainer.innerHTML = '';
+        nextButton.textContent = 'Responder';
+        nextButton.onclick = () => {
+            checkAnswer();
+        };
+    }
+
+    function checkAnswer() {
+        const selectedAnswer = document.querySelector('input[name="answer"]:checked');
+        if (!selectedAnswer) {
+            alert('Por favor, selecione uma resposta.');
+            return;
+        }
+
+        const answer = selectedAnswer.value;
+        const question = questions[currentQuestionIndex];
+        const feedbackContainer = document.getElementById('feedback');
+        const correct = question.correct;
+        const explanation = question.explanations[answer] || '';
+
+        if (answer === correct) {
+            score++;
+            feedbackContainer.innerHTML = `<p class="feedback correct">Correto! ${question.explanations[correct]}</p>`;
+        } else {
+            feedbackContainer.innerHTML = `<p class="feedback wrong">Incorreto. ${explanation}</p>`;
+        }
+
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            document.getElementById('next-button').textContent = 'Próxima Pergunta';
+            document.getElementById('next-button').onclick = () => {
+                showQuestion(currentQuestionIndex);
+            };
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        const resultsList = document.getElementById('results-list');
+        const feedbackContainer = document.getElementById('feedback');
+        const restartTimerContainer = document.getElementById('restart-timer');
+        const timerElement = document.getElementById('timer');
+
+        feedbackContainer.innerHTML = `<p class="feedback final">Seu resultado: ${score} de ${questions.length}</p>`;
+
+        resultsList.innerHTML = '';
+
+        // Salvar resultado no localStorage
+        let results = JSON.parse(localStorage.getItem('quizResults')) || [];
+        results.push({ score, date: new Date().toLocaleString() });
+        if (results.length > 5) results.shift();
+        localStorage.setItem('quizResults', JSON.stringify(results));
+
+        // Exibir últimos resultados
+        results.forEach(result => {
+            const listItem = document.createElement('li');
+            listItem.textContent = `Pontuação: ${result.score} - Data: ${result.date}`;
+            resultsList.appendChild(listItem);
+        });
+
+        restartTimerContainer.style.display = 'block';
+        let seconds = 5;
+        timerElement.textContent = seconds;
+        restartTimer = setInterval(() => {
+            seconds--;
+            timerElement.textContent = seconds;
+            if (seconds <= 0) {
+                clearInterval(restartTimer);
+                location.reload();
+            }
+        }, 1000);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        showQuestion(currentQuestionIndex);
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Login</title>
+</head>
+<body>
+<div class="container">
+    <div class="image">
+        <img src="{{ url_for('static', filename='images/image1.png') }}" alt="Descrição da imagem">
+    </div>
+    <div class="login-container" id="auth-container">
+        <!-- Formulário de Login -->
+        <div class="form-container" id="login-form">
+            <h2>Login</h2>
+            <form method="POST" action="/">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> <!-- Token CSRF oculto -->
+
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required><br>
+
+                <label for="senha">Senha:</label>
+                <input type="password" id="senha" name="senha" required><br>
+
+                <button type="submit">Entrar</button>
+            </form>
+            <p class="forgot-password"><a href="#" onclick="showForgotPassword()">Esqueceu a senha?</a></p>
+            <p class="switch-form">Não tem uma conta? <a href="#" onclick="switchToRegister()">Registrar</a></p>
+            {% if error %}
+                <p class="error" id="error-message">{{ error }}</p>
+                <script>
+                    setTimeout(function() {
+                        document.getElementById('error-message').style.display = 'none';
+                    }, 2000);
+                </script>
+            {% endif %}
+            {% if message %}
+                <p class="message">{{ message }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Formulário de Registro -->
+        <div class="form-container" id="register-form" style="display: none;">
+            <h2>Registrar</h2>
+            <form method="POST" action="/register">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> <!-- Token CSRF oculto -->
+                <label for="register-email">Email:</label>
+                <input type="email" id="register-email" name="email" required><br>
+
+                <label for="register-senha">Senha:</label>
+                <input type="password" id="register-senha" name="senha" required><br>
+
+                <button type="submit">Registrar</button>
+            </form>
+            <p class="switch-form">Já tem uma conta? <a href="#" onclick="switchToLogin()">Login</a></p>
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Formulário de Esqueceu a Senha -->
+        <div class="form-container" id="forgot-password-form" style="display: none;">
+            <h2>Recuperar Senha</h2>
+            <form method="POST" action="/forgot-password">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> <!-- Token CSRF oculto -->
+                <label for="forgot-email">Email:</label>
+                <input type="email" id="forgot-email" name="email" required><br>
+
+                <button type="submit">Enviar link de recuperação</button>
+            </form>
+            <p class="switch-form"><a href="#" onclick="switchToLogin()">Voltar ao login</a></p>
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% endif %}
+            {% if message %}
+                <p class="message">{{ message }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchToRegister() {
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('forgot-password-form').style.display = 'none';
+        document.getElementById('register-form').style.display = 'block';
+    }
+
+    function switchToLogin() {
+        document.getElementById('register-form').style.display = 'none';
+        document.getElementById('forgot-password-form').style.display = 'none';
+        document.getElementById('login-form').style.display = 'block';
+    }
+
+    function showForgotPassword() {
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('forgot-password-form').style.display = 'block';
+    }
+</script>
+</body>
+</html>
