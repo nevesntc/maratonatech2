@@ -1,6 +1,16 @@
 {
-  "version": 3,
+  "version": 2,
+  "functions": {
+    "api/*.py": {
+      "runtime": "@vercel/python",
+      "memory": 512,
+      "maxDuration": 10
+    }
+  },
   "routes": [
-    { "src": "/(.*)", "dest": "app.py" }
+    {
+      "src": "/(.*)",
+      "dest": "app.py"
+    }
   ]
 }
